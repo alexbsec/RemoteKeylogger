@@ -1,10 +1,9 @@
 const fs = require("fs");
 const express = require("express");
-const bodyparser = require("body-parser");
 
 const app = express();
 
-app.use(bodyparser.json({extended: true}));
+app.use(express.json({extended: true}));
 
 const port = 8080;
 
